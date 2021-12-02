@@ -6,16 +6,17 @@ from PIL import Image
 
 
 # Convolution
-def image_padding(image, KernelSize):
+def image_padding(image, KernelSize, KernelSizeC):
     p = int(np.floor(KernelSize / 2))
+    p2 = int(np.floor(KernelSizeC / 2))
     # print(p)
     (w, h) = np.shape(image)
-    # print("====",w,h)
-    pad_img = np.zeros((w + 2 * p, h + 2 * p))
-    pad_img[int(p):int(-1 * p), int(p):int(-1 * p)] = image
-    cv2.imshow('pad_img', pad_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    print("====",w,h)
+    pad_img = np.zeros((w + 2 * p, h + 2 * p2))
+    pad_img[int(p):int(-1 * p), int(p2):int(-1 * p2)] = image
+    # cv2.imshow('pad_img', pad_img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return pad_img
 
@@ -33,7 +34,7 @@ def convolution(image, Kernel, stride=1, padding=True):
     if stride is None:
         stride = KernelSize
     if padding:
-        pad_img = image_padding(image, KernelSize)
+        pad_img = image_padding(image, KernelSize,KernelSizeC)
         resx = np.zeros((row, col))
         print(row,col,"1roooow")
     else:
@@ -42,15 +43,15 @@ def convolution(image, Kernel, stride=1, padding=True):
     nrow, ncol = pad_img.shape
 
     xpatch = np.arange(0, nrow - KernelSize + 1, stride)
-    ypatch = np.arange(0, ncol - KernelSizeC + 1, stride)
-    print(ypatch.shape)
-    print(xpatch.shape)
+    ypatch = np.arange(0, ncol - KernelSize + 1, stride)
+
+    print(xpatch.shape,ypatch.shape)
 
     # print("=", matrix.shape)
     for x_id, x in enumerate(xpatch):
         for y_id, y in enumerate(ypatch):
             matrix = pad_img[x:x + KernelSize, y:y + KernelSizeC]
-
+            print(matrix.shape,"{{{{{{",Kernel.shape)
             # multi_matrix = np.multiply(matrix, Kernel)
             # Normalize sum of squared difference
             s = np.sum((matrix[:, :] - Kernel[:, :]) ** 2)
@@ -60,9 +61,9 @@ def convolution(image, Kernel, stride=1, padding=True):
             # print("s ", s)
             out = s / deno
             # print(out)
-    print(matrix.shape)
-    print("llll",resx.shape)
-            # resx[x_id, y_id] = out
+    # print(matrix.shape)
+    # print("llll",resx.shape)
+            resx[x_id, y_id] = out
 
 
     return resx
